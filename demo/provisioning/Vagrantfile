@@ -1,0 +1,50 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Multi-Machine Environment mimicking production environment using Vagrant
+
+$controllerscript = <<-script
+    sudo apt update -y
+    sudo apt install -y ansible 
+    sudo apt install -y git
+script
+
+class Configurator 
+    # Defines Vagrant Box with given box name, host name, ip address
+    def self.box(vm, os, host, ip)
+        vm.box = os
+        vm.hostname = host
+        vm.network "private_network", ip: ip
+    end
+    # Defines VM settings such as cloning, memory, no.of CPUs
+    def self.settings(vb, clone, memory, cpus)
+        vb.linked_clone = clone
+        vb.memory = memory
+        vb.cpus = cpus
+    end
+    # Box Provisions based on condition
+    def self.provision(vm, isController)
+        if isController == true
+            vm.provision "shell", inline: $controllerscript
+            vm.provision "file", source: "~/.ssh/id_rsa", destination: "~/.ssh/id_rsa"
+        end
+    end
+end
+
+Vagrant.configure("2") do |config|
+
+    # Configuring own SSH Key
+    config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
+    config.ssh.private_key_path = ["~/.ssh/id_rsa", "~/.vagrant.d/insecure_private_key"]
+    config.ssh.insert_key = false
+
+    config.vm.define "sandbox" do |sandbox|
+        Configurator.box(sandbox.vm, "debian/buster64", "sandbox", "192.168.1.11")
+        config.vm.provider "virtualbox" do |vb|
+            Configurator.settings(vb, true, 4098, 2)
+        end
+        Configurator.provision(sandbox.vm, true)
+    end    
+
+   end
+  
