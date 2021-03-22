@@ -27,4 +27,6 @@
       - htop 
       - sudo
       - git
+      - zip
+      - unzip
 

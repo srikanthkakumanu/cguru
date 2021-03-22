@@ -11,14 +11,29 @@
     path: /usr/lib/gradle
     state: directory
 
-- name: Unpack TAR ball
+- name: Unpack Gradle zip File
   unarchive:
     dest: /usr/lib/gradle
     src: /etc/gradle-6.8.3-bin.zip
     remote_src: yes
 
-- name: Set GRADLE_HOME Environment variable
-  blockinfile:
-    insertafter: EOF
-    path: /etc/environment
-    block: export PATH=$PATH:/usr/lib/gradle/bin
+- name: set GRADLE_HOME
+  shell: "echo $GRADLE_HOME"
+  environment:
+    GRADLE_HOME: /usr/lib/gradle/gradle-6.8.3
+  register: gradle_home
+
+- name: Print GRADLE_HOME
+  debug: 
+    var: gradle_home.stdout
+
+- name: set GRADLE_HOME in .profile
+  insertafter: EOF
+  lineinfile:
+    path: /home/vagrant/.profile
+    state: present
+    line: "{{ item }}"
+  with_items:
+  - 'export GRADLE_HOME=/usr/lib/gradle/gradle-6.8.3'
+  - 'export PATH=$PATH:$GRADLE_HOME/bin'
+
