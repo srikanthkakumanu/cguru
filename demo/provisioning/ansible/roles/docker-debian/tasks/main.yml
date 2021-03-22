@@ -1,0 +1,104 @@
+---
+- name: Update APT packages
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    # upgrade: yes
+    # cache_valid_time: 86400 #One day
+    state: latest
+
+- name: Install pre-requisite packages for Docker
+  apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg-agent
+      - software-properties-common
+      - python-pip
+      - python-setuptools
+      - python3
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+      - python-backports.ssl-match-hostname
+
+- name: Add Docker GPG apt key
+  apt_key: 
+    url: https://download.docker.com/linux/debian/gpg
+    state: present  
+
+- name: Add Docker Repository
+  apt_repository: 
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
+    state: present
+
+- name: Update APT packages
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Install Docker CE
+  apt:
+    name: docker-ce
+    state: present
+    force_apt_get: yes
+
+- name: Install Docker using pip
+  pip:
+    name: docker
+    # state: present
+    # force_apt_get: yes
+
+- name: Install Docker CE Client
+  apt:
+    name: docker-ce-cli
+    state: present
+    force_apt_get: yes
+
+- name: Install containerd.io
+  apt:
+    name: containerd.io
+    state: present
+    force_apt_get: yes
+
+# - name: Test Docker with Hello-World example
+#   shell: "docker run hello-world"
+#   register: hello_world_output
+
+# - name: Show output of hello world example
+#   debug:
+#     msg: "Container Output: {{ hello_world_output.stdout }}"
+
+- name: Create docker group
+  group:
+    name: docker
+    state: present
+
+- name: Adding devops user to docker group
+  user:
+    name: devops
+    group: docker
+    append: yes
+
+- name: Adding vagrant user to docker group
+  user:
+    name: vagrant
+    group: docker
+    append: yes
+
+- name: Install Docker Compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64
+    dest: "/usr/local/bin/docker-compose"
+    mode: 0755
+
+- name: Install CTOP
+  get_url:
+    url: https://github.com/bcicen/ctop/releases/download/v0.7.3/ctop-0.7.3-linux-amd64
+    dest: "/usr/local/bin/ctop"
+    mode: 0755
+
+- name: Reboot server in order for changes to take place
+  reboot:
+    post_reboot_delay: 15 # Do not mention below 15 secs
+    test_command: uptime

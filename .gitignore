@@ -1,6 +1,4 @@
 ./videos
 ./videos/*
-./demo/provisioning/vagrant
-./demo/provisioning/vagrant/*
-
-
+./demo/provisioning/.vagrant
+./demo/provisioning/.vagrant/*

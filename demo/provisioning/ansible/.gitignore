@@ -1,0 +1,6 @@
+.vagrant/
+.vagrant/*
+../../videos/
+../../videos/*
+
+
