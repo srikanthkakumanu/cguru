@@ -9,6 +9,7 @@
    - openJDK
   # - oracleJDK
    - gradle
+   - jenkins
   # - docker-jenkins
   # - docker-nginx
   

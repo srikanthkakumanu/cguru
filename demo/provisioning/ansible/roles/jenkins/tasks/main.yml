@@ -1,0 +1,39 @@
+---
+- name: Update APT packages
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Import Jenkins Key
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+    state: present
+
+- name: Add Jenkins Repository 
+  apt_repository:
+    repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+    state: present
+
+- name: Install Jenkins
+  apt:
+    name: jenkins
+    update_cache: true
+
+- name: Ensure Jenkins is running
+  service:
+    name: jenkins
+    state: started 
+    
+
+- name: Sleep for 30 seconds 
+  wait_for: 
+    timeout: 30
+
+# - name: Init Jenkins password
+#   shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+#   changed_when: false
+#   register: jenkinsPasswrd
+
+# - name: Print Jenkins Password
+#   debug: 
+#     var: jenkinsPasswrd.stdout
