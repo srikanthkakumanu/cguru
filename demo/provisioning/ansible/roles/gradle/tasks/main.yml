@@ -28,7 +28,6 @@
     var: gradle_home.stdout
 
 - name: set GRADLE_HOME in .profile
-  insertafter: EOF
   lineinfile:
     path: /home/vagrant/.profile
     state: present
@@ -38,7 +37,7 @@
   - 'export PATH=$PATH:$GRADLE_HOME/bin'
 
 - name: source .profile file in the shell
-  sudo: no
+  become: no
   shell: source /home/vagrant/.profile
   args: 
     executable: /bin/bash

@@ -1,35 +1,37 @@
 ---
-- name: Get Open JDK 11 TAR ball
+- include_vars: ../vars/main.yml
+
+- name: Get Open JDK {{ JDK_VERSION }} TAR ball
   become: yes
   get_url:
-    url: https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz
-    dest: /etc/open-jdk11.tar.gz
-    checksum: sha256:99be79935354f5c0df1ad293620ea36d13f48ec3ea870c838f20c504c9668b57
+    url: "{{ JDK_URL }}"
+    dest: "{{ JDK_URL_DEST_FILE }}"
+    checksum: sha256:"{{ JDK_SHA256_CHECKSUM }}"
     validate_certs: false
     mode: 0644
     
-- name: Make JAVA 11 Directory
+- name: Make JAVA Directory
   file:
-    path: /usr/lib/java11
+    path: "{{ JDK_EXTRACT_DIR }}"
     state: directory
 
 - name: Unpack TAR ball
   unarchive:
-    dest: /usr/lib/java11
-    src: /etc/open-jdk11.tar.gz
+    dest: "{{ JDK_EXTRACT_DIR }}"
+    src: "{{ JDK_URL_DEST_FILE }}"
     remote_src: yes
 
 - name: Update Alternatives for JAVA
   alternatives:
     name: java
-    path: /usr/lib/java11/jdk-11.0.2/bin/java
+    path: "{{ JDK_ALTERNATIVES_FULL_PATH }}"
     link: /usr/bin/java
     priority: 20000
 
 - name: set JAVA_HOME
   shell: "echo $JAVA_HOME"
   environment:
-    JAVA_HOME: /usr/lib/java11/jdk-11.0.2
+    JAVA_HOME: "{{JDK_HOME_DIR}}"
   register: java_home
 
 - name: Print JAVA_HOME
@@ -37,13 +39,12 @@
     var: java_home.stdout
 
 - name: set JAVA_HOME in .profile
-#  insertafter: EOF
   lineinfile:
     path: /home/vagrant/.profile
     state: present
     line: "{{ item }}"
   with_items:
-  - 'export JAVA_HOME=/usr/lib/java11/jdk-11.0.2'
+  - 'export JAVA_HOME="{{JDK_HOME_DIR}}"'
   - 'export PATH=$PATH:$JAVA_HOME/bin'
 
 - name: source .profile file in the shell
@@ -51,114 +52,3 @@
   shell: source /home/vagrant/.profile
   args: 
     executable: /bin/bash
-
-
-# OPEN JDK 9 Installation
-
-# - name: Get Open JDK 9 TAR ball
-#   become: yes
-#   get_url:
-#     url: https://download.java.net/java/GA/jdk9/9/binaries/openjdk-9_linux-x64_bin.tar.gz
-#     dest: /etc/open-jdk9.tar.gz
-#     checksum: sha256:f908e31b6185e11b322825809172dcbb7ac0dce64061c9cf154cb1b0df884480
-#     validate_certs: false
-#     mode: 0644
-    
-# - name: Make JAVA 9 Directory
-#   file:
-#     path: /usr/lib/java9
-#     state: directory
-
-# - name: Unpack TAR ball
-#   unarchive:
-#     dest: /usr/lib/java9
-#     src: /etc/open-jdk9.tar.gz
-#     remote_src: yes
-
-# - name: Update Alternatives for JAVA
-#   alternatives:
-#     name: java
-#     path: /usr/lib/java9/jdk-9/bin/java
-#     link: /usr/bin/java
-#     priority: 20000
-
-# - name: set JAVA_HOME
-#   shell: "echo $JAVA_HOME"
-#   environment:
-#     JAVA_HOME: /usr/lib/java9/jdk-9
-#   register: java_home
-
-# - name: Print JAVA_HOME
-#   debug: 
-#     var: java_home.stdout
-
-# - name: set JAVA_HOME in .profile
-# #  insertafter: EOF
-#   lineinfile:
-#     path: /home/vagrant/.profile
-#     state: present
-#     line: "{{ item }}"
-#   with_items:
-#   - 'export JAVA_HOME=/usr/lib/java9/jdk-9'
-#   - 'export PATH=$PATH:$JAVA_HOME/bin'
-
-# - name: source .profile file in the shell
-#   become: no
-#   shell: source /home/vagrant/.profile
-#   args: 
-#     executable: /bin/bash
-
-# OPEN JDK 15 INSTALLATION & SETUP
-
-# - name: Get Open JDK TAR ball
-#   become: yes
-#   get_url:
-#     url: https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_linux-x64_bin.tar.gz
-#     dest: /etc/open-jdk15.tar.gz
-#     checksum: sha256:91ac6fc353b6bf39d995572b700e37a20e119a87034eeb939a6f24356fbcd207
-#     validate_certs: false
-#     mode: 0644
-    
-# - name: Make JAVA 15 Directory
-#   file:
-#     path: /usr/lib/java15
-#     state: directory
-
-# - name: Unpack TAR ball
-#   unarchive:
-#     dest: /usr/lib/java15
-#     src: /etc/open-jdk15.tar.gz
-#     remote_src: yes
-
-# - name: Update Alternatives for JAVA
-#   alternatives:
-#     name: java
-#     path: /usr/lib/java15/jdk-15.0.2/bin/java
-#     link: /usr/bin/java
-#     priority: 20000
-
-# - name: set JAVA_HOME
-#   shell: "echo $JAVA_HOME"
-#   environment:
-#     JAVA_HOME: /usr/lib/java15/jdk-15.0.2
-#   register: java_home
-
-# - name: Print JAVA_HOME
-#   debug: 
-#     var: java_home.stdout
-
-# - name: set JAVA_HOME in .profile
-#   insertafter: EOF
-#   lineinfile:
-#     path: /home/vagrant/.profile
-#     state: present
-#     line: "{{ item }}"
-#   with_items:
-#   - 'export JAVA_HOME=/usr/lib/java15/jdk-15.0.2'
-#   - 'export PATH=$PATH:$JAVA_HOME/bin'
-
-# - name: source .profile file in the shell
-#   sudo: no
-#   shell: source /home/vagrant/.profile
-#   args: 
-#     executable: /bin/bash
