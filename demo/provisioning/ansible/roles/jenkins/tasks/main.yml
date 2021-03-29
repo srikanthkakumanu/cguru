@@ -9,15 +9,22 @@
     url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
     state: present
 
-- name: Add Jenkins Repository 
+- name: Add Jenkins Repository to /etc/apt/sources.list
   apt_repository:
-    repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+    repo: deb https://pkg.jenkins.io/debian-stable binary/
     state: present
 
 - name: Install Jenkins
   apt:
     name: jenkins
     update_cache: true
+    state: present
+
+# - name: Change Jenkins JAVA options to skip the setup wizard
+#   lineinfile:
+#     dest: /etc/init.d/jenkins
+#     regexp: ^JENKINS_JAVA_OPTIONS=
+#     line: JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
 
 - name: Ensure Jenkins is running
   service:
@@ -25,15 +32,15 @@
     state: started 
     
 
-- name: Sleep for 30 seconds 
-  wait_for: 
-    timeout: 30
+# - name: Sleep for 30 seconds 
+#   wait_for: 
+#     timeout: 30
 
-# - name: Init Jenkins password
-#   shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-#   changed_when: false
-#   register: jenkinsPasswrd
+- name: Init Jenkins password
+  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+  changed_when: false
+  register: jenkinsPasswrd
 
-# - name: Print Jenkins Password
-#   debug: 
-#     var: jenkinsPasswrd.stdout
+- name: Print Jenkins Password
+  debug: 
+    var: jenkinsPasswrd.stdout

@@ -1,11 +1,11 @@
 ---
-JDK_VERSION: 11.0.2
-JDK_URL: https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz
-JDK_SHA256_CHECKSUM: 99be79935354f5c0df1ad293620ea36d13f48ec3ea870c838f20c504c9668b57
+JDK_VERSION: 11
+JDK_URL: https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
+JDK_SHA256_CHECKSUM: 3784cfc4670f0d4c5482604c7c513beb1a92b005f569df9bf100e8bef6610f2e
 JDK_URL_DEST_FILE: /etc/open-jdk11.tar.gz
 JDK_EXTRACT_DIR: /usr/lib/java11
-JDK_HOME_DIR: /usr/lib/java11/jdk-11.0.2 
-JDK_ALTERNATIVES_FULL_PATH: /usr/lib/java11/jdk-11.0.2/bin/java
+JDK_HOME_DIR: /usr/lib/java11/jdk-11
+JDK_ALTERNATIVES_FULL_PATH: /usr/lib/java11/jdk-11/bin/java
 
 # JDK_VERSION: 9
 # JDK_URL: https://download.java.net/java/GA/jdk9/9/binaries/openjdk-9_linux-x64_bin.tar.gz
