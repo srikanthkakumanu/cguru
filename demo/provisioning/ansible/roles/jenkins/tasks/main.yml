@@ -13,6 +13,7 @@
   apt_repository:
     repo: deb https://pkg.jenkins.io/debian-stable binary/
     state: present
+    validate_certs: no
 
 - name: Install Jenkins
   apt:
@@ -26,17 +27,23 @@
 #     regexp: ^JENKINS_JAVA_OPTIONS=
 #     line: JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
 
+- name: Ensure groovy csrf error is bypassed
+  become: yes
+  lineinfile:
+    path: /etc/default/jenkins
+    line: 'JAVA_ARGS="$JAVA_ARGS -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"'
+    create: yes
+
 - name: Ensure Jenkins is running
   service:
     name: jenkins
     state: started 
     
+- name: Sleep for 25 seconds 
+  wait_for: 
+    timeout: 25
 
-# - name: Sleep for 30 seconds 
-#   wait_for: 
-#     timeout: 30
-
-- name: Init Jenkins password
+- name: Fetch Jenkins password
   shell: cat /var/lib/jenkins/secrets/initialAdminPassword
   changed_when: false
   register: jenkinsPasswrd
@@ -44,3 +51,42 @@
 - name: Print Jenkins Password
   debug: 
     var: jenkinsPasswrd.stdout
+
+# - name: unlock and add admin user
+#   jenkins_script:
+#     script: |
+#       import jenkins.model.*
+#       import hudson.security.*
+      
+#       def instance = Jenkins.getInstance()
+#       def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+#       hudsonRealm.createAccount('jenkins', 'jenkins')
+#       instance.setSecurityRealm(hudsonRealm)
+#       def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+#       strategy.setAllowAnonymousRead(false)
+#       instance.setAuthorizationStrategy(strategy)
+#       instance.save()
+#     args:
+#      user_pwd: "jenkins"
+    
+#     user: admin
+#     password: "{{ jenkinsPasswrd.stdout }}"
+
+# - name: complete setup wizard
+#   jenkins_script:
+#     script: |
+#       import static jenkins.model.Jenkins.instance as jenkins
+#       import jenkins.install.InstallState
+#       if (!jenkins.installState.isSetupComplete()) {
+#         InstallState.INITIAL_SETUP_COMPLETED.initializeState()
+#       }
+#       user: admin
+#       password: "{{ jenkinsPasswrd.stdout }}"
+
+# - name: install suggested plugins
+#   jenkins_plugin:
+#     name: "{{ item }}"
+#     state: latest
+#     url_username: admin
+#     url_password: "{{ jenkinsPasswrd.stdout }}"
+#     with_items: "{{ jenkins_plugins }}"

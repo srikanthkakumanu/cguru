@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "sandbox" do |sandbox|
         Configurator.box(sandbox.vm, "debian/buster64", "sandbox", "192.168.1.11")
         config.vm.provider "virtualbox" do |vb|
-            Configurator.settings(vb, true, 4098, 2)
+            Configurator.settings(vb, true, 6144, 2)
         end
         Configurator.provision(sandbox.vm, true)
     end    
