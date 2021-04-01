@@ -30,3 +30,6 @@
       - zip
       - unzip
 
+# - name: Install & setup sdkman and JDK 8
+#   script: ../files/sdkman-jdk-setup.sh
+
