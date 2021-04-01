@@ -1,0 +1,30 @@
+---
+
+# Install Open JDK 8
+- name: Install public key from JFrog openJDK
+  apt_key:
+    url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+    state: present
+
+- name: Add JFrog openJDK repository
+  become: true
+  apt_repository:
+    repo: 'deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main'
+    update_cache: yes
+    state: present
+
+- name: Install JFrog open JDK 8
+  become: true
+  apt:
+    name: adoptopenjdk-8-hotspot
+    update_cache: true
+    state: present
+
+- name: set JAVA_HOME in .profile
+  lineinfile:
+    path: /home/vagrant/.profile
+    state: present
+    line: "{{ item }}"
+  with_items:
+  - 'export JAVA_HOME=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64'
+  - 'export PATH=$PATH:$JAVA_HOME/bin'
