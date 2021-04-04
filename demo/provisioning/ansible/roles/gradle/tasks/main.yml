@@ -2,8 +2,8 @@
 - name: Download Gradle 
   become: yes
   get_url:
-    url: https://services.gradle.org/distributions/gradle-6.8.3-bin.zip
-    dest: /etc/gradle-6.8.3-bin.zip
+    url: https://services.gradle.org/distributions/gradle-4.6-bin.zip
+    dest: /etc/gradle-4.6-bin.zip
     mode: 0644
 
 - name: Make Gradle Directory
@@ -14,13 +14,13 @@
 - name: Unpack Gradle zip File
   unarchive:
     dest: /usr/lib/gradle
-    src: /etc/gradle-6.8.3-bin.zip
+    src: /etc/gradle-4.6-bin.zip
     remote_src: yes
 
 - name: set GRADLE_HOME
   shell: "echo $GRADLE_HOME"
   environment:
-    GRADLE_HOME: /usr/lib/gradle/gradle-6.8.3
+    GRADLE_HOME: /usr/lib/gradle/gradle-4.6
   register: gradle_home
 
 - name: Print GRADLE_HOME
@@ -33,7 +33,7 @@
     state: present
     line: "{{ item }}"
   with_items:
-  - 'export GRADLE_HOME=/usr/lib/gradle/gradle-6.8.3'
+  - 'export GRADLE_HOME=/usr/lib/gradle/gradle-4.6'
   - 'export PATH=$PATH:$GRADLE_HOME/bin'
 
 - name: source .profile file in the shell

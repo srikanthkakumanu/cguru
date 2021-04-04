@@ -1,6 +1,6 @@
 ---
-- import_playbook: jfrog-openjdk8.yml
-
-
+#- import_playbook: jfrog-openjdk8.yml
+#- include: jfrog-openjdk8.yml
+- include: openjdk11.yml
 
 
