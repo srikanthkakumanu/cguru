@@ -1,0 +1,13 @@
+---
+GRADLE_VERSION: 6.8.3
+GRADLE_URL: https://services.gradle.org/distributions/gradle-6.8.3-bin.zip
+GRADLE_URL_DEST_FILE: /etc/gradle-6.8.3-bin.zip
+GRADLE_EXTRACT_DIR: /usr/lib/gradle
+GRADLE_HOME_DIR: /usr/lib/gradle/gradle-6.8.3
+
+# GRADLE_VERSION: 4.6
+# GRADLE_URL: https://services.gradle.org/distributions/gradle-4.6-bin.zip
+# GRADLE_URL_DEST_FILE: /etc/gradle-4.6-bin.zip
+# GRADLE_EXTRACT_DIR: /usr/lib/gradle
+# GRADLE_HOME_DIR: /usr/lib/gradle/gradle-4.6
+# JDK_ALTERNATIVES_FULL_PATH: /usr/lib/java9/jdk-9/bin/java
