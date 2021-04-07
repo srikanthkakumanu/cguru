@@ -42,7 +42,7 @@
 - name: Sleep for 25 seconds 
   wait_for: 
     timeout: 25
-
+  
 - name: Fetch Jenkins password
   shell: cat /var/lib/jenkins/secrets/initialAdminPassword
   changed_when: false
@@ -51,6 +51,40 @@
 - name: Print Jenkins Password
   debug: 
     var: jenkinsPasswrd.stdout
+
+- name: Fetch current user information
+  shell: whoami
+  changed_when: false
+  register: whoami
+
+- name: Print current user information
+  debug:
+    var: whoami.stdout
+
+
+# - name: JENKINS-CTEDENTIALS | Create CRUMB authentication request
+#   uri:
+#     url: 'http://localhost:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
+#     user: admin
+#     password: '{{ jenkinsPasswrd.stdout }}'
+#     force_basic_auth: yes
+#     return_content: yes
+#   register: crumb
+
+# - name: JENKINS-CTEDENTIALS | Add Jenkins administration account
+#   uri:
+#     method: POST
+#     url: 'http://localhost:8080/securityRealm/createAccountByAdmin'
+#     user: admin
+#     password: '{{ jenkinsPasswrd.stdout }}'
+#     force_basic_auth: yes
+#     follow_redirects: all
+#     headers:
+#       Jenkins-Crumb: '{{ crumb.content.split(":")[1] }}'
+#       Cookie: '{{ crumb.set_cookie }}'
+#     # body: 'username=user2&password1=pass&password2=pass&fullname=fullname&email=bubba%40dummy.bg'
+#     body: 'username={{ jenkins_user }}&password1={{ jenkins_pass }}&password2={{ jenkins_pass }}&fullname={{ jenkins_fullname }}&email={{ jenkins_email }}'
+
 
 # - name: unlock and add admin user
 #   jenkins_script:
