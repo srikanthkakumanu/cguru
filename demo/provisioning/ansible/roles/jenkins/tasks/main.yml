@@ -123,4 +123,78 @@
 #     state: latest
 #     url_username: admin
 #     url_password: "{{ jenkinsPasswrd.stdout }}"
-#     with_items: "{{ jenkins_plugins }}"
+#     with_items: 
+#     - cloudbees-folder
+#     - gradle
+#     - ant
+#     - git
+#     - antisamy-markup-formatter
+#     - build-timeout
+#     - credentials-binding
+#     - timestamper
+#     - github-branch-source
+#     - pipeline-github-lib- name: unlock and add admin user
+#   jenkins_script:
+#     script: |
+#       import jenkins.model.*
+#       import hudson.security.*
+      
+#       def instance = Jenkins.getInstance()
+#       def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+#       hudsonRealm.createAccount('jenkins', 'jenkins')
+#       instance.setSecurityRealm(hudsonRealm)
+#       def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+#       strategy.setAllowAnonymousRead(false)
+#       instance.setAuthorizationStrategy(strategy)
+#       instance.save()
+#     args:
+#      user_pwd: "jenkins"
+    
+#     user: admin
+#     password: "{{ jenkinsPasswrd.stdout }}"
+
+# - name: complete setup wizard
+#   jenkins_script:
+#     script: |
+#       import static jenkins.model.Jenkins.instance as jenkins
+#       import jenkins.install.InstallState
+#       if (!jenkins.installState.isSetupComplete()) {
+#         InstallState.INITIAL_SETUP_COMPLETED.initializeState()
+#       }
+#       user: admin
+#       password: "{{ jenkinsPasswrd.stdout }}"
+
+# - name: install suggested plugins
+#   jenkins_plugin:
+#     name: "{{ item }}"
+#     state: latest
+#     url_username: admin
+#     url_password: "{{ jenkinsPasswrd.stdout }}"
+#     with_items: 
+#     - cloudbees-folder
+#     - gradle
+#     - ant
+#     - git
+#     - antisamy-markup-formatter
+#     - build-timeout
+#     - credentials-binding
+#     - timestamper
+#     - github-branch-source
+#     - pipeline-github-lib
+#     - pipeline-stage-view
+#     - pam-auth
+#     - ldap
+#     - email-ext
+#     - mailer
+#     - matrix-auth
+#     - ssh-slaves
+#     - ws-cleanup
+
+#     - pipeline-stage-view
+#     - pam-auth
+#     - ldap
+#     - email-ext
+#     - mailer
+#     - matrix-auth
+#     - ssh-slaves
+#     - ws-cleanup

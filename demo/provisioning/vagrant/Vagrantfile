@@ -4,9 +4,10 @@
 # Multi-Machine Environment mimicking production environment using Vagrant
 
 $controllerscript = <<-script
-    sudo apt update -y
-    sudo apt install -y ansible 
-    sudo apt install -y git
+    sudo apt-get update -y
+    sudo apt-get upgrade -y
+    sudo apt-get install -y ansible 
+    sudo apt-get install -y git
     git clone https://github.com/srikanthkakumanu/cguru.git
 script
 
