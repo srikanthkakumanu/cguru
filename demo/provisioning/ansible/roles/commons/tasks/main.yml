@@ -1,13 +1,15 @@
 ---
 # tasks file for common
 - name: create devops group
-  become: true
+  become: yes
+  become_user: root
   group:
     name: devops
     state: present
     
 - name: create devops user with admin privileges and assign to devops group
-  become: true
+  become: yes
+  become_user: root
   user: 
     name: "devops"
     password: "devops"
@@ -47,23 +49,22 @@
     dest: /usr/lib/ngrok
     remote_src: yes
 
-- name: set ngrok PATH in /etc/environment
-  lineinfile:
-#    path: /home/vagrant/.profile
-    path: /etc/environment
-    state: present
-    line: "{{ item }}"
-  with_items:
-  - 'export PATH=$PATH:/usr/lib/ngrok/ngrok'
+# - name: set ngrok PATH in /etc/environment
+#   lineinfile:
+# #    path: /home/vagrant/.profile
+#     path: /etc/environment
+#     state: present
+#     line: "{{ item }}"
+#   with_items:
+#   - 'export PATH=$PATH:/usr/lib/ngrok/ngrok'
 
-- name: source /etc/environment
-  become: yes
-  shell: source /etc/environment
-  args: 
-    executable: /bin/bash
+# - name: source /etc/environment
+#   become: yes
+#   shell: source /etc/environment
+#   args: 
+#     executable: /bin/sh
 
 - name: Assign ngrok account auth token
-  become: yes
   shell: "/usr/lib/ngrok/ngrok authtoken 1qsCUjLBDm8Sy5s6xpy8p4gKpa6_4a4GM638mPiVNaCe2hqms"
   register: ngrok_auth_token
 

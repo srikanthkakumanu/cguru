@@ -16,7 +16,7 @@
     # cache_valid_time: 86400 #One day
 
 - name: Pull official NGINX image and create docker container
-  become: true
+  become: yes
   become_user: root
   become_method: sudo
   docker_container:

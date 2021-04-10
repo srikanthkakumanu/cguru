@@ -15,7 +15,7 @@
     # cache_valid_time: 86400 #One day
 
 - name: Pull official Jenkins image and create Jenkins container
-  become: true
+  become: yes
   become_user: root
   become_method: sudo
   docker_container:

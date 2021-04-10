@@ -27,14 +27,22 @@
 #     regexp: ^JENKINS_JAVA_OPTIONS=
 #     line: JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
 
+- name: Set custom HTTP port to jenkins
+  lineinfile:
+    path: /etc/default/jenkins
+    regexp: '--httpPort='
+    line: 'JENKINS_ARGS="--webroot=/var/cache/$NAME/war --httpPort=8081"'
+    backrefs: yes
+
 - name: Ensure groovy csrf error is bypassed
-  become: yes
   lineinfile:
     path: /etc/default/jenkins
     line: 'JAVA_ARGS="$JAVA_ARGS -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"'
     create: yes
 
 - name: Ensure Jenkins is running
+  become: yes
+  become_user: root
   service:
     name: jenkins
     state: started 

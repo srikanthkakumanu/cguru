@@ -2,7 +2,6 @@
 - include_vars: ../vars/main.yml
 
 - name: Download Gradle {{ GRADLE_VERSION }}
-  become: yes
   get_url:
     url: "{{GRADLE_URL}}" 
     dest: "{{GRADLE_URL_DEST_FILE}}"
@@ -39,7 +38,6 @@
   - 'export PATH=$PATH:$GRADLE_HOME/bin'
 
 - name: source /etc/environment
-  become: yes
   shell: source /etc/environment
   args: 
     executable: /bin/bash
