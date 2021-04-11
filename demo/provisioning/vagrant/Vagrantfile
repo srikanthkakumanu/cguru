@@ -39,7 +39,8 @@ Vagrant.configure("2") do |config|
         config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
         config.ssh.private_key_path = ["~/.ssh/id_rsa", "~/.vagrant.d/insecure_private_key"]
         config.ssh.insert_key = false
-#        config.ssh.shell = "/bin/bash -1"
+        # config.vm.network "forwarded_port", guest: 4040, host: 4040, protocol: "tcp"
+        # config.vm.network "forwarded_port", guest: 4040, host: 4040, protocol: "udp"
 
         Configurator.box(sandbox.vm, "debian/buster64", "sandbox", "192.168.1.11")
 
