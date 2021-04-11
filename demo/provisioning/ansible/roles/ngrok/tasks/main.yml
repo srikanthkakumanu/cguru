@@ -1,9 +1,16 @@
 ---
+- name: Check whether ngrok zip file exists or not
+  stat: 
+    path: /etc/ngrok.zip
+  register: ngrok_file
+
 - name: Download ngrok 
   get_url:
     url: https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
     dest: /etc/ngrok.zip
     mode: 0644
+    state: present
+  when: not ngrok_file.stat.exists
 
 - name: unzip ngrok ZIP file
   unarchive:
@@ -31,7 +38,7 @@
 - name: Copy ngrok shell script
   copy: 
     src: start-ngrok.sh 
-    dest: ~ 
+    dest: ~/ 
     mode: 0777
 
 - name: Start ngrok
