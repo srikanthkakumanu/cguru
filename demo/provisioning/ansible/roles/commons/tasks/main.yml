@@ -49,23 +49,25 @@
     dest: /usr/lib/ngrok
     remote_src: yes
 
-# - name: set ngrok PATH in /etc/environment
-#   lineinfile:
-# #    path: /home/vagrant/.profile
-#     path: /etc/environment
-#     state: present
-#     line: "{{ item }}"
-#   with_items:
-#   - 'export PATH=$PATH:/usr/lib/ngrok/ngrok'
+- name: set ngrok PATH in /etc/profile
+  lineinfile:
+    path: /etc/profile
+    state: present
+    line: "{{ item }}"
+  with_items:
+  - 'PATH=$PATH:/usr/lib/ngrok/ngrok'
 
-# - name: source /etc/environment
-#   become: yes
-#   shell: source /etc/environment
-#   args: 
-#     executable: /bin/sh
+- name: Fetch current user information
+  shell: whoami
+  changed_when: false
+  register: whoami
+
+- name: Print current user information
+  debug:
+    var: whoami.stdout
 
 - name: Assign ngrok account auth token
-  shell: "/usr/lib/ngrok/ngrok authtoken 1qsCUjLBDm8Sy5s6xpy8p4gKpa6_4a4GM638mPiVNaCe2hqms"
+  command: "/usr/lib/ngrok/ngrok authtoken 1qsCUjLBDm8Sy5s6xpy8p4gKpa6_4a4GM638mPiVNaCe2hqms"
   register: ngrok_auth_token
 
 - name: Print ngrok auth token assignment result
@@ -73,13 +75,10 @@
     var: ngrok_auth_token
 
 # - name: Start ngrok 
-#   shell: /usr/lib/ngrok/ngrok http 8080
+#   command: /usr/lib/ngrok/ngrok http 8080
 #   register: ngrok_start_result
 
 # - name: Print ngrok Start Result
 #   debug:
 #     var: ngrok_start_result
-
-# - name: Install & setup sdkman and JDK 8
-#   script: ../files/sdkman-jdk-setup.sh
 

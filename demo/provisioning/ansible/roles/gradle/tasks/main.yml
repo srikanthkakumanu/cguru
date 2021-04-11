@@ -18,26 +18,20 @@
     src: "{{ GRADLE_URL_DEST_FILE }}"
     remote_src: yes
 
-- name: set GRADLE_HOME
-  shell: "echo $GRADLE_HOME"
-  environment:
-    GRADLE_HOME: "{{GRADLE_HOME_DIR}}"
+- name: set GRADLE_HOME in /etc/profile
+  lineinfile:
+    path: /etc/profile
+    state: present
+    line: "{{ item }}"
+  with_items:
+  - 'GRADLE_HOME={{GRADLE_HOME_DIR}}'
+  - 'PATH=$PATH:$GRADLE_HOME/bin'
+
+- name: Check GRADLE_HOME
+  command: "echo $GRADLE_HOME"
   register: gradle_home
 
 - name: Print GRADLE_HOME
   debug: 
     var: gradle_home.stdout
 
-- name: set GRADLE_HOME in /etc/environment
-  lineinfile:
-    path: /etc/environment
-    state: present
-    line: "{{ item }}"
-  with_items:
-  - 'export GRADLE_HOME={{GRADLE_HOME_DIR}}'
-  - 'export PATH=$PATH:$GRADLE_HOME/bin'
-
-- name: source /etc/environment
-  shell: source /etc/environment
-  args: 
-    executable: /bin/bash
