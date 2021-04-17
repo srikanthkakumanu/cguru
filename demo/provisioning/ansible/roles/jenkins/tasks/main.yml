@@ -1,4 +1,6 @@
 ---
+- include_vars: ../vars/main.yml
+
 - name: Update APT packages
   apt:
     update_cache: yes
@@ -21,24 +23,22 @@
     update_cache: true
     state: present
 
-# - name: Change Jenkins JAVA options to skip the setup wizard
-#   lineinfile:
-#     dest: /etc/init.d/jenkins
-#     regexp: ^JENKINS_JAVA_OPTIONS=
-#     line: JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"
-
 - name: Set custom HTTP port to jenkins
   lineinfile:
     path: /etc/default/jenkins
     regexp: '--httpPort='
     line: 'JENKINS_ARGS="--webroot=/var/cache/$NAME/war --httpPort=8081"'
+    state: present
     backrefs: yes
 
-- name: Ensure groovy csrf error is bypassed
+- name: Pass JAVA_ARGS values to ensure groovy csrf error is bypassed & skip initial admin setup (if enabled)
   lineinfile:
     path: /etc/default/jenkins
-    line: 'JAVA_ARGS="$JAVA_ARGS -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"'
-    create: yes
+    regexp: 'JAVA_ARGS="-Djava.awt.headless=true"'
+    # line: 'JAVA_ARGS="-Djava.awt.headless=true -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true -Djenkins.install.runSetupWizard=false"'
+    line: 'JAVA_ARGS="-Djava.awt.headless=true -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"'
+    state: present
+    backrefs: yes
 
 - name: Ensure Jenkins is running
   become: yes
@@ -50,51 +50,63 @@
 - name: Sleep for 25 seconds 
   wait_for: 
     timeout: 25
-  
-- name: Fetch Jenkins password
-  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-  changed_when: false
+
+- name: Check Jenkins Password file exists or not
+  stat:
+    path: /var/lib/jenkins/secrets/initialAdminPassword
+  register: password_file
+
+- name: Fetch Jenkins password if file exists
+  command:
+    cmd: cat /var/lib/jenkins/secrets/initialAdminPassword
   register: jenkinsPasswrd
+  when: password_file.stat.exists
 
 - name: Print Jenkins Password
   debug: 
     var: jenkinsPasswrd.stdout
+  when: password_file.stat.exists and jenkinsPasswrd is defined
 
-- name: Fetch current user information
-  shell: whoami
-  changed_when: false
-  register: whoami
+# - name: Fetch current user information
+#   shell: whoami
+#   changed_when: false
+#   register: whoami
 
-- name: Print current user information
-  debug:
-    var: whoami.stdout
+# - name: Print current user information
+#   debug:
+#     var: whoami.stdout
 
 
-# - name: JENKINS-CTEDENTIALS | Create CRUMB authentication request
+# - name: JENKINS-CREDENTIALS - Create crumb authentication request
 #   uri:
-#     url: 'http://localhost:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
+#     url: 'http://localhost:8081/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
 #     user: admin
 #     password: '{{ jenkinsPasswrd.stdout }}'
 #     force_basic_auth: yes
 #     return_content: yes
 #   register: crumb
+#   when: jenkinsPasswrd is defined
 
-# - name: JENKINS-CTEDENTIALS | Add Jenkins administration account
+# - name: Print crumb information
+#   debug:
+#     var: crumb
+#   when: crumb is defined 
+
+# - name: JENKINS-CREDENTIALS - Add Jenkins administration account
 #   uri:
 #     method: POST
-#     url: 'http://localhost:8080/securityRealm/createAccountByAdmin'
+#     url: 'http://localhost:8081/securityRealm/createAccountByAdmin'
 #     user: admin
 #     password: '{{ jenkinsPasswrd.stdout }}'
 #     force_basic_auth: yes
 #     follow_redirects: all
 #     headers:
 #       Jenkins-Crumb: '{{ crumb.content.split(":")[1] }}'
-#       Cookie: '{{ crumb.set_cookie }}'
-#     # body: 'username=user2&password1=pass&password2=pass&fullname=fullname&email=bubba%40dummy.bg'
-#     body: 'username={{ jenkins_user }}&password1={{ jenkins_pass }}&password2={{ jenkins_pass }}&fullname={{ jenkins_fullname }}&email={{ jenkins_email }}'
+#       # Cookie: '{{ crumb.set_cookie }}'
+#     body: 'username={{ JENKINS_USER_NAME }}&password1={{ JENKINS_PASSWORD1 }}&password2={{ JENKINS_PASSWORD2 }}&fullname={{ JENKINS_FULL_NAME }}&email={{ JENKINS_EMAIL }}%40dummy.bg'
+#     when: crumb is defined
 
-
-# - name: unlock and add admin user
+# - name: unlock Jenkins and create jenkins user
 #   jenkins_script:
 #     script: |
 #       import jenkins.model.*
@@ -108,101 +120,28 @@
 #       strategy.setAllowAnonymousRead(false)
 #       instance.setAuthorizationStrategy(strategy)
 #       instance.save()
-#     args:
-#      user_pwd: "jenkins"
-    
+#       args:
+#         user_pwd: "jenkins"
 #     user: admin
 #     password: "{{ jenkinsPasswrd.stdout }}"
+#     url: http://localhost:8081
 
-# - name: complete setup wizard
-#   jenkins_script:
-#     script: |
-#       import static jenkins.model.Jenkins.instance as jenkins
-#       import jenkins.install.InstallState
-#       if (!jenkins.installState.isSetupComplete()) {
-#         InstallState.INITIAL_SETUP_COMPLETED.initializeState()
-#       }
-#       user: admin
-#       password: "{{ jenkinsPasswrd.stdout }}"
-
-# - name: install suggested plugins
+# - name: install jenkins suggested plugins
 #   jenkins_plugin:
-#     name: "{{ item }}"
+#     name: "{{ suggested_plugins }}"
 #     state: latest
-#     url_username: admin
-#     url_password: "{{ jenkinsPasswrd.stdout }}"
-#     with_items: 
-#     - cloudbees-folder
-#     - gradle
-#     - ant
-#     - git
-#     - antisamy-markup-formatter
-#     - build-timeout
-#     - credentials-binding
-#     - timestamper
-#     - github-branch-source
-#     - pipeline-github-lib- name: unlock and add admin user
-#   jenkins_script:
-#     script: |
-#       import jenkins.model.*
-#       import hudson.security.*
-      
-#       def instance = Jenkins.getInstance()
-#       def hudsonRealm = new HudsonPrivateSecurityRealm(false)
-#       hudsonRealm.createAccount('jenkins', 'jenkins')
-#       instance.setSecurityRealm(hudsonRealm)
-#       def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
-#       strategy.setAllowAnonymousRead(false)
-#       instance.setAuthorizationStrategy(strategy)
-#       instance.save()
-#     args:
-#      user_pwd: "jenkins"
-    
-#     user: admin
-#     password: "{{ jenkinsPasswrd.stdout }}"
+#     url_username: jenkins
+#     url_password: jenkins
+#     url: http://localhost:8081
+#     # loop: "{{ suggested_plugins }}"
 
-# - name: complete setup wizard
-#   jenkins_script:
-#     script: |
-#       import static jenkins.model.Jenkins.instance as jenkins
-#       import jenkins.install.InstallState
-#       if (!jenkins.installState.isSetupComplete()) {
-#         InstallState.INITIAL_SETUP_COMPLETED.initializeState()
-#       }
-#       user: admin
-#       password: "{{ jenkinsPasswrd.stdout }}"
+# - name: Check if restart is required by any of the unversioned plugins
+#   set_fact:
+#     jenkins_restart_required: yes    
 
-# - name: install suggested plugins
-#   jenkins_plugin:
-#     name: "{{ item }}"
-#     state: latest
-#     url_username: admin
-#     url_password: "{{ jenkinsPasswrd.stdout }}"
-#     with_items: 
-#     - cloudbees-folder
-#     - gradle
-#     - ant
-#     - git
-#     - antisamy-markup-formatter
-#     - build-timeout
-#     - credentials-binding
-#     - timestamper
-#     - github-branch-source
-#     - pipeline-github-lib
-#     - pipeline-stage-view
-#     - pam-auth
-#     - ldap
-#     - email-ext
-#     - mailer
-#     - matrix-auth
-#     - ssh-slaves
-#     - ws-cleanup
-
-#     - pipeline-stage-view
-#     - pam-auth
-#     - ldap
-#     - email-ext
-#     - mailer
-#     - matrix-auth
-#     - ssh-slaves
-#     - ws-cleanup
+# - name: Ensure Jenkins is restarted
+#   become: yes
+#   become_user: root
+#   service:
+#     name: jenkins
+#     state: restarted 

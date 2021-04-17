@@ -38,11 +38,11 @@
   - 'JAVA_HOME="{{JDK_HOME_DIR}}"'
   - 'PATH=$PATH:$JAVA_HOME/bin'
 
-- name: Check JAVA_HOME
-  command: "echo $JAVA_HOME"
-  register: java_home
+# - name: Check JAVA_HOME
+#   command: "echo $JAVA_HOME"
+#   register: java_home
 
-- name: Print JAVA_HOME
-  debug: 
-    var: java_home.stdout
+# - name: Print JAVA_HOME
+#   debug: 
+#     var: java_home.stdout
 

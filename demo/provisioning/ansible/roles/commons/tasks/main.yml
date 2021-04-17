@@ -32,11 +32,11 @@
       - zip
       - unzip
 
-- name: Fetch current user information
-  shell: whoami
-  changed_when: false
-  register: whoami
+# - name: Fetch current user information
+#   shell: whoami
+#   changed_when: false
+#   register: whoami
 
-- name: Print current user information
-  debug:
-    var: whoami.stdout
+# - name: Print current user information
+#   debug:
+#     var: whoami.stdout

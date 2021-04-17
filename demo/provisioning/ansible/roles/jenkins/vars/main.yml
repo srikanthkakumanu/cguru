@@ -1,0 +1,61 @@
+---
+JENKINS_USER_NAME: jenkins
+JENKINS_PASSWORD1: jenkins
+JENKINS_PASSWORD2: jenkins
+JENKINS_EMAIL: srik1980@gmail.com
+JENKINS_FULL_NAME: Srikanth Kakumanu
+suggested_plugins:
+  cloudbees-folder:
+    enabled: yes
+    with_dependencies: yes
+  gradle:
+    enabled: yes
+    with_dependencies: yes
+  ant:
+    enabled: yes
+    with_dependencies: yes
+  git:
+    enabled: yes
+    with_dependencies: yes
+  antisamy-markup-formatter:
+    enabled: yes
+    with_dependencies: yes
+  build-timeout:
+    enabled: yes
+    with_dependencies: yes
+  credentials-binding:
+    enabled: yes
+    with_dependencies: yes
+  timestamper:
+    enabled: yes
+    with_dependencies: yes
+  github-branch-source:
+    enabled: yes
+    with_dependencies: yes
+  pipeline-github-lib:
+    enabled: yes
+    with_dependencies: yes
+  pipeline-stage-view:
+    enabled: yes
+    with_dependencies: yes
+  pam-auth:
+    enabled: yes
+    with_dependencies: yes
+  ldap:
+    enabled: yes
+    with_dependencies: yes
+  email-ext:
+    enabled: yes
+    with_dependencies: yes
+  mailer:
+    enabled: yes
+    with_dependencies: yes
+  matrix-auth:
+    enabled: yes
+    with_dependencies: yes
+  ssh-slaves:
+    enabled: yes
+    with_dependencies: yes
+  ws-cleanup:
+    enabled: yes
+    with_dependencies: yes

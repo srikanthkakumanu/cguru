@@ -3,7 +3,7 @@
     url: https://download.oracle.com/otn/java/jdk/15.0.1%2B9/51f4f36ad4ef43e39d0dfdbaf6549e32/jdk-15.0.1_linux-x64_bin.tar.gz
 #    headers: 'Cookie:oraclelicense=accept-securebackup-cookie'
     headers: {"Cookie": {"oraclelicense": accept-securebackup-cookie}}
-    dest: /etc/oracle-jdk15.tar.gz
+    dest: /usr/local/etc/oracle-jdk15.tar.gz
     checksum: sha256:445a1c5c335b53b030f68aca58493ddedd49f4b53085618bc1ae7aba68156606
     validate_certs: false
     mode: 0644
@@ -16,7 +16,7 @@
 - name: Unpack TAR ball
   unarchive:
     dest: /usr/lib/java15
-    src: /etc/oracle-jdk15.tar.gz
+    src: /usr/local/etc/oracle-jdk15.tar.gz
     remote_src: yes
 
 - name: Update Alternatives for JAVA
@@ -26,12 +26,11 @@
     link: /usr/bin/java
     priority: 20000
 
-- name: Set JAVA_HOME Environment variable
-  blockinfile:
-    path: /etc/environment
-    block: export JAVA_HOME=/usr/lib/java15/jdk-15.0.1
-
-- name: Add JAVA_HOME Environment variable to PATH
-  blockinfile:
-    path: /etc/environment
-    block: export PATH=$PATH:$JAVA_HOME/bin
+- name: set JAVA_HOME in /etc/profile
+  lineinfile:
+    path: /etc/profile
+    state: present
+    line: "{{ item }}"
+  with_items:
+  - 'JAVA_HOME=/usr/lib/java15/jdk-15.0.1'
+  - 'PATH=$PATH:$JAVA_HOME/bin'

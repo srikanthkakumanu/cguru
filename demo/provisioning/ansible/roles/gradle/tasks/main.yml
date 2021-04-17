@@ -27,11 +27,11 @@
   - 'GRADLE_HOME={{GRADLE_HOME_DIR}}'
   - 'PATH=$PATH:$GRADLE_HOME/bin'
 
-- name: Check GRADLE_HOME
-  command: "echo $GRADLE_HOME"
-  register: gradle_home
+# - name: Check GRADLE_HOME
+#   command: "echo $GRADLE_HOME"
+#   register: gradle_home
 
-- name: Print GRADLE_HOME
-  debug: 
-    var: gradle_home.stdout
+# - name: Print GRADLE_HOME
+#   debug: 
+#     var: gradle_home.stdout
 
