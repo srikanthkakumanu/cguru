@@ -1,22 +1,27 @@
 ---
-- name: Check that the ngrok zip file exists
+- name: Check if ngrok zip file exists
   stat: 
     path: /usr/local/etc/ngrok.zip
-  register: ngrok_file
+  register: ngrok_zip_file
 
 - name: Download ngrok 
   get_url:
     url: https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
     dest: /usr/local/etc/ngrok.zip
     mode: 0644
-  when: not ngrok_file.stat.exists
+  when: not ngrok_zip_file.stat.exists
+
+- name: Check if ngrok command file exists
+  stat:
+    path: /usr/local/bin/ngrok
+  register: ngrok_file
 
 - name: unzip ngrok ZIP file
   unarchive:
     src: /usr/local/etc/ngrok.zip
     dest: /usr/local/bin
     remote_src: yes
-  when: ngrok_file.stat.exists
+  when: not ngrok_file.stat.exists
 
 - name: Assign ngrok account auth token
   command: "ngrok authtoken 1qsCUjLBDm8Sy5s6xpy8p4gKpa6_4a4GM638mPiVNaCe2hqms"
@@ -39,13 +44,3 @@
 - name: Print ngrok Jenkins URL
   debug:
     var: ngrok_url
-
-# - name: Fetch current user information
-#   shell: whoami
-#   changed_when: false
-#   register: whoami
-
-# - name: Print current user information
-#   debug:
-#     var: whoami.stdout
-
