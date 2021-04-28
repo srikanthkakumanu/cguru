@@ -38,7 +38,7 @@
     mode: 0777
 
 - name: Start ngrok
-  command: sh ~/start-ngrok.sh 8081
+  command: sh ~/start-ngrok.sh 6650
   register: ngrok_url
 
 - name: Print ngrok Jenkins URL

@@ -6,19 +6,29 @@
   group:
     name: devops
     state: present
-    
+
+- name: Allow 'devops' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%devops'
+    line: '%devops ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
 - name: create devops user with admin privileges and assign to devops group
   become: yes
   become_user: root
   user: 
     name: "devops"
-    password: "devops"
+    password: "{{devops_default_password | password_hash('sha512')}}"
     comment: "DevOps User"
     uid: 2001
-    group: devops
+    shell: /bin/bash
     groups: 
       - sudo
       - devops
+      - vagrant
+    append: yes
     state: present
     
 - name: install other basic packages
@@ -31,6 +41,7 @@
       - git
       - zip
       - unzip
+      - expect
 
 # - name: Fetch current user information
 #   shell: whoami

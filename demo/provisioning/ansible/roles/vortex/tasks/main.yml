@@ -1,0 +1,62 @@
+---
+- name: Check if vortex zip file exists
+  stat: 
+    path: /usr/local/etc/vortex.zip
+  register: vortex_zip_file
+
+- name: Download vortex 
+  get_url:
+    url: https://www.vtxhub.com/download/1.1.5/linux/vortex.zip
+    dest: /usr/local/etc/vortex.zip
+    mode: 0644
+  when: not vortex_zip_file.stat.exists
+
+- name: Check if vortex command file exists
+  stat:
+    path: /usr/local/bin/vortex
+  register: vortex_file
+
+- name: unzip vortex ZIP file
+  unarchive:
+    src: /usr/local/etc/vortex.zip
+    dest: /usr/local/bin
+    remote_src: yes
+  when: not vortex_file.stat.exists
+
+- name: Copy vortex shell script
+  copy: 
+    src: vortex-jenkins.sh 
+    dest: ~/ 
+    mode: 0777
+
+# - name: Assign ngrok account auth token
+#   command: "ngrok authtoken 1qsCUjLBDm8Sy5s6xpy8p4gKpa6_4a4GM638mPiVNaCe2hqms"
+#   register: ngrok_auth_token
+
+# - name: Print ngrok auth token assignment result
+#   debug:
+#     var: ngrok_auth_token
+
+# - name: Copy ngrok shell script
+#   copy: 
+#     src: start-ngrok.sh 
+#     dest: ~/ 
+#     mode: 0777
+
+# - name: Start ngrok
+#   command: sh ~/start-ngrok.sh 8081
+#   register: ngrok_url
+
+# - name: Print ngrok Jenkins URL
+#   debug:
+#     var: ngrok_url
+
+# - name: Fetch current user information
+#   shell: whoami
+#   changed_when: false
+#   register: whoami
+
+# - name: Print current user information
+#   debug:
+#     var: whoami.stdout
+

@@ -1,0 +1,138 @@
+---
+# tasks file for sonarqube
+- name: Copy DB setup script for SonarQube
+  copy: 
+    src: postgresql-db-setup.sh 
+    dest: ~/ 
+    mode: 0777
+    owner: postgres
+    group: postgres
+
+# adduser --system --no-create-home --group --disabled-login sonar
+- name: Create sonar user 
+  user:
+    name: sonar
+    password: "{{sonar_default_password | password_hash('sha512')}}"
+    comment: System user for running Sonarqube
+    state: present
+    system: yes
+    create_home: no
+    groups: 
+      - devops
+      - root
+      - vagrant
+      - jenkins 
+      - postgres
+    shell: /sbin/nologin
+    append: yes
+
+# - name: Setup DB for SonarQube
+#   become: yes
+#   become_method: sudo
+#   become_user: postgres
+#   command: sh ~/postgresql-db-setup.sh
+
+# chown -R sonarqube:sonarqube /opt/sonarqube  
+# - name: Set permissions for sonarqube directory
+#   become: yes
+#   become_user: root
+#   file:
+#     path: /usr/local/sonarqube-8.8.0.42792
+#     state: directory
+#     recurse: yes
+#     # group: devops 
+#     owner: sonar
+#     mode: u=rwX,g=rwX,o=rwX
+
+- name: Check if sonarqube zip file exists
+  stat: 
+    path: /usr/local/etc/sonarqube.zip
+  register: sonarqube_zip_file
+
+- name: Download sonarqube zip file
+  get_url:
+    url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.8.0.42792.zip
+    dest: /usr/local/etc/sonarqube.zip
+    mode: 0777
+  when: not sonarqube_zip_file.stat.exists
+
+- name: Check if sonarqube directory exists
+  stat:
+    path: /usr/local/sonarqube-8.8.0.42792
+  register: sonarqube_dir
+
+- name: unzip sonarqube ZIP file
+  unarchive:
+    src: /usr/local/etc/sonarqube.zip
+    dest: /usr/local/
+    remote_src: yes
+    # owner: sonar
+  when: not sonarqube_dir.stat.exists
+
+- name: Set custom properties in sonar.properties file
+  template: 
+    src: templates/sonar.properties.j2
+    dest: /usr/local/sonarqube-8.8.0.42792/conf/sonar.properties
+    # owner: sonar
+    # group: sonar
+    mode: 0777
+    backup: yes  
+
+- name: Copy the sonarqube service script file
+  template: 
+    src: templates/sonar.sh.j2
+    dest: /usr/local/sonarqube-8.8.0.42792/bin/linux-x86-64/sonar.sh
+#    owner: sonar
+    mode: 0777  
+
+- name: Check sonar.conf exists in target host
+  stat: 
+    path: /etc/security/limits.d/99-sonar.conf
+  register: sonar_conf_file
+
+- name: Copy OS configuration file limits (sonar.conf) to target host
+  copy: 
+    src: 99-sonar.conf 
+    dest: /etc/security/limits.d 
+    mode: 0777
+  when: not sonar_conf_file.stat.exists
+
+- name: Check sysctl.conf exists in target host
+  stat: 
+    path: /etc/sysctl.d/99-sysctl.conf
+  register: sysctl_conf_file
+
+- name: Copy Linux Kernel Level Limits file (sysctl.conf) to target host for Elastic Search
+  copy: 
+    src: 99-sysctl.conf 
+    dest: /etc/sysctl.d 
+    mode: 0777
+  when: not sysctl_conf_file.stat.exists
+
+- name: Fetch current user information
+  shell: whoami
+  changed_when: false
+  register: whoami
+
+- name: Print current user information
+  debug:
+    var: whoami.stdout
+
+- name: Ensure PostgreSQL DB is running
+  # become: yes
+  # become_method: sudo
+  # become_user: postgres
+  service:
+    name: postgresql
+    state: started 
+
+- name: Start SonarQube
+  command: sh /usr/local/sonarqube-8.8.0.42792/bin/linux-x86-64/sonar.sh start
+
+# - name: Ensure Sonarqube is running
+#   service:
+#     name: sonarqube
+#     state: started 
+#     enabled: yes
+#     daemon_reload: yes
+    

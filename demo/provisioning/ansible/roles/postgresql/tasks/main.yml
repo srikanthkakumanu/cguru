@@ -1,0 +1,22 @@
+---
+# tasks file for postgresql
+
+# - name: Fetch current user information
+#   shell: whoami
+#   changed_when: false
+#   register: whoami
+
+# - name: Print current user information
+#   debug:
+#     var: whoami.stdout
+
+- name: Install PostgreSQL
+  apt:
+    update_cache: yes
+    state: present
+    pkg:
+    - postgresql
+    - postgresql-contrib
+    - libpq-dev
+    - python3-psycopg2
+

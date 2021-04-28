@@ -23,22 +23,14 @@
     update_cache: true
     state: present
 
-# - name: Set custom HTTP port to jenkins
-#   lineinfile:
-#     path: /etc/default/jenkins
-#     regexp: '--httpPort='
-#     line: 'JENKINS_ARGS="--webroot=/var/cache/$NAME/war --httpPort=8081"'
-#     state: present
-#     backrefs: yes
-
-# - name: Pass JAVA_ARGS values to ensure groovy csrf error is bypassed & skip initial admin setup (if enabled)
-#   lineinfile:
-#     path: /etc/default/jenkins
-#     regexp: 'JAVA_ARGS="-Djava.awt.headless=true"'
-#     # line: 'JAVA_ARGS="-Djava.awt.headless=true -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true -Djenkins.install.runSetupWizard=false"'
-#     line: 'JAVA_ARGS="-Djava.awt.headless=true -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"'
-#     state: present
-#     backrefs: yes
+- name: Assign devops user to jenkins group
+  become: yes
+  become_user: root
+  user: 
+    name: "devops"
+    group: "jenkins" 
+    append: yes
+    state: present 
 
 - name: Customize Jenkins config
   template: 
@@ -56,7 +48,7 @@
     
 - name: Sleep for 25 seconds 
   wait_for: 
-    timeout: 25
+    timeout: 2
 
 - name: Check Jenkins Password file exists or not
   stat:

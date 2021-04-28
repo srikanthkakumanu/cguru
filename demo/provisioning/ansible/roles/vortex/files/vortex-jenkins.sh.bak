@@ -1,0 +1,54 @@
+#!/usr/bin/expect -f
+
+# set force_conservative 0; # set to 1 to force conservative mode even if
+# 			  # ;# script wasn't run conservatively originally
+# if {$force_conservative} {
+# 	set send_slow {1 .1}
+# 	proc send {ignore arg} {
+# 		sleep .1
+# 		exp_send -s -- $arg
+# 	}
+# }
+
+set timeout -1
+spawn vortex --site srik-jenkinsdevops.app.vtxhub.com --host 192.168.1.11 --port 6650 --provider http
+match_max 100000
+expect -exact "\r
+\[1G\[0J\[90m\[39m\r
+\r\[90m\[36mEmail address:\[90m\[39m\[90m \[39m \[17G"
+send -- "srikanthkakumanu@yahoo.com\r"
+expect -exact "srikanthkakumanu@yahoo.com\r"
+expect -exact "\r
+\[1G\[0J\[90m\[36mPassword: \[90m\[39m\[90m \[39m \[13G"
+send -- "Berlin123@"
+# expect -exact "*"
+# send -- "e"
+# expect -exact "*"
+# send -- "r"
+# expect -exact "*"
+# send -- "l"
+# expect -exact "*"
+# send -- "i"
+# expect -exact "*"
+# send -- "n"
+# expect -exact "*"
+# send -- "1"
+# expect -exact "*"
+# send -- "2"
+# expect -exact "*"
+# send -- "3"
+# expect -exact "*"
+# send -- "@"
+# expect -exact "*"
+send -- "\r"
+# expect -exact "\r\r
+# \r\r
+# \[32mConnection\[39m          \[32mActive\[39m\r
+# Account             srikanthkakumanu@yahoo.com\r
+# Forwarding          http://srik-jenkinsdevops.app.vtxhub.com -> http://192.168.1.11:6650\r
+# Forwarding          https://srik-jenkinsdevops.app.vtxhub.com -> http://192.168.1.11:6650\r
+# Verify TLS          off \[2mto support self-signed SSL certificates\[22m\r
+# Shell Version       1.1.5\r
+# \[1G\[0J\[90m\[32m>\[90m\[39m\[90m \[39m \[4G"
+# send -- ""
+expect eof
