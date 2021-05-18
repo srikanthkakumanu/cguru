@@ -1,36 +1,56 @@
 ---
 # tasks file for sonarqube
+# adduser --system --no-create-home --group --disabled-login sonar
+# - name: Create sonar user 
+#   user:
+#     name: sonar
+#     password: "{{sonar_default_password | password_hash('sha512')}}"
+#     comment: System user for running Sonarqube
+#     state: present
+#     system: yes
+#     # create_home: no
+#     groups: 
+#       - devops
+#       - root
+#       - vagrant
+#       - jenkins 
+#       - postgres
+#     # shell: /sbin/nologin
+#     shell: /bin/bash
+#     append: yes
+
+# - name: Fetch current user information
+#   become: yes
+#   become_user: postgres
+#   shell: whoami
+#   changed_when: false
+#   register: whoami
+
+# - name: Print current user information
+#   debug:
+#     var: whoami.stdout
+
+# - name: Fetch current working directory
+#   shell: pwd
+#   changed_when: false
+#   register: pwd
+
+# - name: Print current working directory
+#   debug:
+#     var: pwd.stdout
+
 - name: Copy DB setup script for SonarQube
   copy: 
     src: postgresql-db-setup.sh 
-    dest: ~/ 
+    dest: /var/lib/postgresql 
     mode: 0777
     owner: postgres
     group: postgres
 
-# adduser --system --no-create-home --group --disabled-login sonar
-- name: Create sonar user 
-  user:
-    name: sonar
-    password: "{{sonar_default_password | password_hash('sha512')}}"
-    comment: System user for running Sonarqube
-    state: present
-    system: yes
-    create_home: no
-    groups: 
-      - devops
-      - root
-      - vagrant
-      - jenkins 
-      - postgres
-    shell: /sbin/nologin
-    append: yes
-
-# - name: Setup DB for SonarQube
-#   become: yes
-#   become_method: sudo
-#   become_user: postgres
-#   command: sh ~/postgresql-db-setup.sh
+- name: Setup DB for SonarQube
+  become: yes
+  become_user: postgres
+  command: sh /var/lib/postgresql/postgresql-db-setup.sh
 
 # chown -R sonarqube:sonarqube /opt/sonarqube  
 # - name: Set permissions for sonarqube directory
@@ -45,6 +65,8 @@
 #     mode: u=rwX,g=rwX,o=rwX
 
 - name: Check if sonarqube zip file exists
+  become: yes
+  become_user: root
   stat: 
     path: /usr/local/etc/sonarqube.zip
   register: sonarqube_zip_file
@@ -58,7 +80,7 @@
 
 - name: Check if sonarqube directory exists
   stat:
-    path: /usr/local/sonarqube-8.8.0.42792
+    path: /usr/local/sonarqube
   register: sonarqube_dir
 
 - name: unzip sonarqube ZIP file
@@ -69,10 +91,14 @@
     # owner: sonar
   when: not sonarqube_dir.stat.exists
 
+- name: Rename sonarqube folder
+  command: mv /usr/local/sonarqube-8.8.0.42792 /usr/local/sonarqube
+  when: not sonarqube_dir.stat.exists
+
 - name: Set custom properties in sonar.properties file
   template: 
     src: templates/sonar.properties.j2
-    dest: /usr/local/sonarqube-8.8.0.42792/conf/sonar.properties
+    dest: /usr/local/sonarqube/conf/sonar.properties
     # owner: sonar
     # group: sonar
     mode: 0777
@@ -81,7 +107,7 @@
 - name: Copy the sonarqube service script file
   template: 
     src: templates/sonar.sh.j2
-    dest: /usr/local/sonarqube-8.8.0.42792/bin/linux-x86-64/sonar.sh
+    dest: /usr/local/sonarqube/bin/linux-x86-64/sonar.sh
 #    owner: sonar
     mode: 0777  
 
@@ -119,15 +145,12 @@
     var: whoami.stdout
 
 - name: Ensure PostgreSQL DB is running
-  # become: yes
-  # become_method: sudo
-  # become_user: postgres
   service:
     name: postgresql
     state: started 
 
 - name: Start SonarQube
-  command: sh /usr/local/sonarqube-8.8.0.42792/bin/linux-x86-64/sonar.sh start
+  command: sh /usr/local/sonarqube/bin/linux-x86-64/sonar.sh start
 
 # - name: Ensure Sonarqube is running
 #   service:

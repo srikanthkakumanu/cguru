@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CREATE USER sonar
-echo "ALTER USER sonar WITH password 'sonar'; CREATE DATABASE sonar OWNER sonar; GRANT ALL PRIVILEGES ON DATABASE sonar TO sonar;
- \q" | psql;
+echo "CREATE USER sonar;" | psql;
+echo "ALTER USER sonar WITH ENCRYPTED password 'sonar';" | psql;
+echo "CREATE DATABASE sonar OWNER sonar;" | psql;
+echo "GRANT ALL PRIVILEGES ON DATABASE sonar TO sonar;" | psql;
 

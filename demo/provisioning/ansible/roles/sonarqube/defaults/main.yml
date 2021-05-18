@@ -1,2 +1,3 @@
 ---
+postgres_default_password: postgres
 sonar_default_password: sonar
